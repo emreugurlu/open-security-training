@@ -747,13 +747,214 @@
     }
 
     /* Responsive */
+    /* Mobile Responsive Styles */
     @media (max-width: 768px) {
-      .sidebar {
-        width: 240px;
+      body {
+        flex-direction: column;
       }
-      
+
+      /* Sidebar adjustments for mobile */
+      .sidebar {
+        width: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: auto;
+        max-height: 60vh;
+        z-index: 1000;
+        transform: translateY(-100%);
+        transition: transform 0.3s ease;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      }
+
+      .sidebar.collapsed {
+        margin-left: 0;
+        transform: translateY(-100%);
+      }
+
+      .sidebar:not(.collapsed) {
+        transform: translateY(0);
+      }
+
+      .sidebar-toggle {
+        position: fixed;
+        left: auto;
+        right: 20px;
+        top: 20px;
+        z-index: 1001;
+        background: var(--primary-purple);
+        color: white;
+        border-radius: 8px;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      }
+
+      .sidebar-content {
+        overflow-y: auto;
+        max-height: calc(60vh - 100px);
+      }
+
+      /* Main content adjustments */
+      .main-content {
+        width: 100%;
+        margin-left: 0;
+        padding: 70px 0 0 0;
+      }
+
+      /* Policy attestation responsive */
+      .policy-attestation {
+        padding: 20px;
+      }
+
+      .attestation-container {
+        width: 100%;
+        max-width: 100%;
+        padding: 20px;
+        margin: 0;
+      }
+
+      .grc-logo-header h1 {
+        font-size: 24px;
+      }
+
+      .attestation-content h2 {
+        font-size: 20px;
+      }
+
+      .policy-link-box {
+        padding: 16px;
+      }
+
+      .policy-link-box h3 {
+        font-size: 16px;
+      }
+
+      .policy-link-box p, .policy-link-box li {
+        font-size: 13px;
+      }
+
+      /* Module cards responsive */
       .module-cards {
         grid-template-columns: 1fr;
+        padding: 20px;
+        gap: 16px;
+      }
+
+      .module-card {
+        padding: 20px;
+      }
+
+      .module-card-icon {
+        font-size: 40px;
+      }
+
+      .module-card-title {
+        font-size: 18px;
+      }
+
+      .module-card-description {
+        font-size: 13px;
+      }
+
+      /* Progress tracking responsive */
+      .progress-tracker {
+        padding: 16px;
+      }
+
+      .module-progress {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .module-progress-item {
+        width: 100%;
+      }
+
+      /* Buttons responsive */
+      .home-button, .attest-button {
+        font-size: 14px;
+        padding: 12px 24px;
+      }
+
+      /* Popups responsive */
+      .reset-modal-content,
+      #policyPopupContent,
+      #feedbackContent,
+      #phishingLinkContent,
+      #pluginWarningContent,
+      #passwordWarningContent,
+      #resourcePopupContent {
+        width: 95% !important;
+        max-width: 95% !important;
+        padding: 24px !important;
+      }
+
+      /* Feedback form iframe */
+      #feedbackContent {
+        height: 85vh !important;
+      }
+
+      /* Completion banner responsive */
+      .completion-banner {
+        flex-direction: column;
+        padding: 16px;
+        text-align: center;
+      }
+
+      .completion-banner-content {
+        margin-bottom: 12px;
+      }
+
+      .completion-banner h3 {
+        font-size: 18px;
+      }
+
+      .completion-banner p {
+        font-size: 13px;
+      }
+    }
+
+    /* Extra small devices (phones in portrait, less than 480px) */
+    @media (max-width: 480px) {
+      .grc-logo-header h1 {
+        font-size: 20px;
+      }
+
+      .grc-logo-header span {
+        font-size: 36px !important;
+      }
+
+      .attestation-content h2 {
+        font-size: 18px;
+      }
+
+      .module-card-icon {
+        font-size: 36px;
+      }
+
+      .module-card-title {
+        font-size: 16px;
+      }
+
+      .sidebar-toggle {
+        width: 45px;
+        height: 45px;
+        font-size: 20px;
+      }
+
+      .reset-modal-content h2,
+      #policyPopupContent h2 {
+        font-size: 20px !important;
+      }
+
+      .reset-modal-content p,
+      #policyPopupContent p {
+        font-size: 14px !important;
       }
     }
   </style>
