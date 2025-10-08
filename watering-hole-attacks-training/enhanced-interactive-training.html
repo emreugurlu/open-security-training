@@ -1,0 +1,2274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GRC Engineering: Watering Hole Attack Defense Training</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    
+    :root {
+      --primary-purple:#7B2CBF; --light-purple:#E0B0FF; --dark-purple:#4A1A6B;
+      --primary-teal:#06A77D; --light-teal:#B2F5E8; --dark-teal:#045F4A;
+      --primary-off-black:#17191E; --primary-white:#FFFFFF; --success-green:#4CAF50;
+      --warning-amber:#FF9800; --error-red:#F44336; --neutral-gray:#9E9E9E;
+      --light-gray:#F5F5F5; --medium-gray:#E0E0E0; --primary-gradient: linear-gradient(135deg, #7B2CBF 0%, #06A77D 100%);
+    }
+    
+    body { 
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+      background: #0a0e27;
+      color:var(--primary-off-black); 
+      min-height:100vh; 
+      display:flex; 
+      align-items:center; 
+      justify-content:center; 
+      padding:20px; 
+      line-height:1.6;
+      overflow-x: hidden;
+    }
+    
+    /* Static gradient background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 20% 50%, rgba(123,44,191,0.15) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 80%, rgba(123,44,191,0.1) 0%, transparent 50%),
+                  radial-gradient(circle at 40% 20%, rgba(0,85,204,0.1) 0%, transparent 50%);
+      z-index: -1;
+    }
+    
+    .module-container { 
+      background:var(--primary-white); 
+      border-radius:16px; 
+      box-shadow:0 10px 40px rgba(0,8,77,.25); 
+      max-width:1100px; 
+      width:100%; 
+      overflow:hidden;
+    }
+    
+    .grc-header { 
+      background:var(--primary-gradient); 
+      padding:20px 32px; 
+      display:flex; 
+      align-items:center; 
+      justify-content:space-between; 
+      color:var(--primary-white);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .grc-logo { 
+      display:flex; 
+      align-items:center; 
+      gap:16px; 
+      font-weight:700; 
+      font-size:20px;
+      z-index: 2;
+    }
+    
+    .grc-owl { 
+      width:48px; 
+      height:48px; 
+      background:var(--primary-white); 
+      border-radius:12px; 
+      display:flex; 
+      align-items:center; 
+      justify-content:center; 
+      font-size:28px;
+      animation: bounce 2s ease-in-out infinite;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    
+    .grc-owl:hover {
+      transform: rotate(10deg) scale(1.1);
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    
+    .progress-bar { 
+      height:6px; 
+      background:var(--medium-gray); 
+      position:relative; 
+      overflow:hidden; 
+    }
+    
+    .progress-fill { 
+      height:100%; 
+      background:var(--primary-gradient); 
+      width:0%; 
+      transition:width .5s ease;
+      box-shadow: 0 0 10px rgba(123,44,191,0.5);
+    }
+    
+    .slide { 
+      padding:56px 48px; 
+      min-height:580px; 
+      display:none; 
+      animation:slideIn .4s ease;
+      position: relative;
+    }
+    
+    .slide.active { display:block; }
+    
+    @keyframes slideIn { 
+      from{ opacity:0; transform:translateX(30px); } 
+      to{ opacity:1; transform:translateX(0); } 
+    }
+    
+    /* Hide slide content briefly during restoration */
+    .slide.restoring {
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    
+    h1 { 
+      color:var(--dark-purple); 
+      font-size:2.5rem; 
+      font-weight:800; 
+      margin-bottom:24px; 
+      text-align:center; 
+      line-height:1.2; 
+    }
+    
+    h2 { 
+      color:var(--dark-purple); 
+      font-size:2rem; 
+      font-weight:700; 
+      margin-bottom:24px; 
+    }
+    
+    p { 
+      font-size:1.125rem; 
+      margin-bottom:20px; 
+      color:var(--primary-off-black); 
+      line-height:1.7;
+    }
+    
+    .intro-animation {
+      font-size: 120px;
+      text-align: center;
+      margin: 40px 0;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+    }
+    
+    .info-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+      margin: 32px 0;
+    }
+    
+    .info-card {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border: 2px solid var(--medium-gray);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .info-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      border-color: var(--primary-purple);
+    }
+    
+    .info-card-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      display: block;
+    }
+    
+    .info-card h3 {
+      color: var(--dark-purple);
+      font-size: 1.25rem;
+      margin-bottom: 12px;
+    }
+    
+    .navigation { 
+      display:flex; 
+      justify-content:space-between; 
+      align-items:center; 
+      margin-top:40px; 
+      padding-top:32px; 
+      border-top:2px solid var(--medium-gray); 
+    }
+    
+    .btn { 
+      background:var(--primary-gradient); 
+      color:var(--primary-white); 
+      padding:14px 28px; 
+      border:none; 
+      border-radius:8px; 
+      font-size:1rem; 
+      font-weight:600; 
+      cursor:pointer; 
+      transition:all .3s ease; 
+      margin:8px; 
+      display:inline-flex; 
+      align-items:center; 
+      gap:8px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255,255,255,0.3);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+    
+    .btn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+    
+    .btn:hover { 
+      transform:translateY(-2px); 
+      box-shadow:0 6px 20px rgba(123,44,191,.3); 
+    }
+    
+    .btn-secondary { 
+      background:transparent; 
+      color:var(--primary-purple); 
+      border:2px solid var(--primary-purple); 
+    }
+    
+    .btn-secondary:hover { 
+      background:var(--light-purple); 
+      border-color:var(--dark-purple); 
+      color:var(--dark-purple); 
+    }
+    
+    .btn-danger {
+      background: linear-gradient(135deg, #ff3b30, #ff6b60);
+    }
+    
+    .btn-success {
+      background: linear-gradient(135deg, #4CAF50, #66BB6A);
+    }
+    
+    .btn:disabled, .btn.disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    
+    /* Watering hole simulator */
+    .website-simulator {
+      background: #1a1a1a;
+      border-radius: 12px;
+      padding: 0;
+      margin: 24px 0;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+    
+    .browser-bar {
+      background: #2d2d2d;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid #444;
+    }
+    
+    .browser-controls {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .browser-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #ff5f57;
+    }
+    
+    .browser-dot:nth-child(2) { background: #ffbd2e; }
+    .browser-dot:nth-child(3) { background: #28ca42; }
+    
+    .url-bar {
+      flex: 1;
+      background: #1a1a1a;
+      color: #888;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 14px;
+    }
+    
+    .suspicious-url {
+      color: #ff3b30;
+      font-weight: bold;
+    }
+    
+    .website-content {
+      background: #fff;
+      padding: 32px;
+      min-height: 300px;
+      position: relative;
+    }
+    
+    .fake-popup {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      padding: 24px;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      text-align: center;
+      display: none;
+      z-index: 10;
+      border: 3px solid #ff3b30;
+    }
+    
+    .fake-popup.show {
+      display: block;
+      animation: popIn 0.3s ease;
+    }
+    
+    @keyframes popIn {
+      from { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+      to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    }
+    
+    /* Interactive decision buttons */
+    .decision-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+      position: relative;
+      z-index: 50;
+    }
+    
+    .decision-btn {
+      background: #fff;
+      border: 2px solid #e0e0e0;
+      padding: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      text-align: center;
+      position: relative;
+    }
+    
+    .decision-btn:hover {
+      background: var(--light-purple);
+      border-color: var(--primary-purple);
+      box-shadow: 0 4px 12px rgba(123,44,191,0.2);
+      transform: translateY(-2px);
+    }
+    
+    .decision-btn.selected {
+      background: var(--light-purple);
+      border-color: var(--primary-purple);
+      font-weight: 600;
+    }
+    
+    .decision-btn.disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    
+    /* Detection challenge */
+    .detection-challenge {
+      background: #f8f9fa;
+      border: 2px solid var(--medium-gray);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 24px 0;
+    }
+    
+    .site-card {
+      background: #fff;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 12px 0;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .site-card:hover {
+      transform: translateX(4px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .site-card.selected {
+      border-color: var(--primary-purple);
+      background: var(--light-purple);
+    }
+    
+    .site-card.correct {
+      border-color: var(--success-green);
+      background: rgba(76,175,80,0.1);
+    }
+    
+    .site-card.incorrect {
+      border-color: var(--error-red);
+      background: rgba(244,67,54,0.1);
+    }
+    
+    .url-display {
+      font-family: monospace;
+      font-size: 14px;
+      color: #666;
+      margin-top: 8px;
+      padding: 4px 8px;
+      background: #f0f0f0;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    
+    /* Gamification elements */
+    .achievement {
+      position: fixed;
+      top: 20px;
+      right: -500px;
+      background: #fff;
+      padding: 16px 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: right 0.5s ease;
+      z-index: 1000;
+      pointer-events: none;
+    }
+    
+    .achievement.show {
+      right: 20px;
+      pointer-events: auto;
+    }
+    
+    .achievement-icon {
+      font-size: 32px;
+      animation: celebrate 0.5s ease;
+    }
+    
+    @keyframes celebrate {
+      0% { transform: scale(0) rotate(0deg); }
+      50% { transform: scale(1.2) rotate(180deg); }
+      100% { transform: scale(1) rotate(360deg); }
+    }
+    
+    .score-display {
+      background: linear-gradient(135deg, #7B2CBF, #06A77D);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 700;
+      text-align: center;
+      margin: 20px 0;
+      font-size: 1.2rem;
+      box-shadow: 0 4px 12px rgba(123,44,191,0.3);
+    }
+    
+    /* Certificate */
+    .certificate {
+      text-align: center;
+      padding: 48px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 16px;
+      border: 3px solid var(--primary-purple);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .certificate::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(123,44,191,0.1), transparent);
+      animation: shine 3s linear infinite;
+    }
+    
+    @keyframes shine {
+      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+    
+    .certificate-seal {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 24px;
+      position: relative;
+      animation: sealRotate 20s linear infinite;
+    }
+    
+    @keyframes sealRotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .trophy-icon {
+      font-size: 80px;
+      color: #FFD700;
+      text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+      animation: trophyGlow 2s ease-in-out infinite;
+    }
+    
+    @keyframes trophyGlow {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    
+    /* Confetti */
+    .confetti-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 9999;
+      display: none;
+    }
+    
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: var(--primary-purple);
+      animation: confettiFall 3s linear;
+    }
+    
+    @keyframes confettiFall {
+      0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+    
+    
+    /* SCORM status indicator */
+    .scorm-status {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      background: rgba(23,25,30,.9);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: .75rem;
+      display: none;
+      backdrop-filter: blur(10px);
+    }
+    
+    /* Feedback styles */
+    .feedback {
+      padding: 16px;
+      border-radius: 8px;
+      margin-top: 20px;
+      font-size: 16px;
+      display: none;
+    }
+    
+    .feedback.correct {
+      background: #d4edda;
+      color: #155724;
+      border: 2px solid var(--success-green);
+    }
+    
+    .feedback.incorrect {
+      background: #f8d7da;
+      color: #721c24;
+      border: 2px solid var(--error-red);
+    }
+    
+    .feedback.warning {
+      background: #fff3cd;
+      color: #856404;
+      border: 2px solid #ffc107;
+    }
+    
+    /* Responsive */
+    @media (max-width:768px) {
+      .slide { padding:32px 24px; }
+      h1 { font-size:2rem; }
+      h2 { font-size:1.5rem; }
+      .decision-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Achievement Popup -->
+  <div class="achievement" id="achievementPopup">
+    <div class="achievement-icon" id="achievementIcon">🏆</div>
+    <div>
+      <div style="font-weight:700; color:var(--dark-purple);" id="achievementTitle">Achievement Unlocked!</div>
+      <div style="font-size:14px; color:#6c757d;" id="achievementText">You're making great progress!</div>
+    </div>
+  </div>
+
+  <!-- Confetti Container -->
+  <div class="confetti-container" id="confettiContainer"></div>
+
+  <div class="module-container">
+    <div class="grc-header">
+      <div class="grc-logo">
+        <div class="grc-owl" onclick="owlClick()">👾</div>
+        <span>Watering Hole Attacks</span>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressBar"></div></div>
+
+    <!-- Slide 1: Welcome -->
+    <div class="slide active" id="slide1">
+      <h1>💧 Watering Hole Attack Defense</h1>
+      <div class="intro-animation">🦁</div>
+      <p style="text-align:center; font-size:1.25rem; margin-bottom:32px;">
+        Just as predators wait at watering holes for prey, attackers compromise websites your team trusts to infect visitors.
+      </p>
+      <p style="text-align:center; color:#6c757d;">
+        This interactive training will teach you to recognize and defend against these sophisticated attacks.
+      </p>
+      <div class="navigation">
+        <span></span>
+        <button class="btn" onclick="startTraining()">Begin Training →</button>
+      </div>
+    </div>
+
+    <!-- Slide 2: Understanding Watering Holes -->
+    <div class="slide" id="slide2">
+      <h2>📚 Understanding Watering Hole Attacks</h2>
+      <p>Watering hole attacks are particularly dangerous because they exploit trust in legitimate websites.</p>
+      
+      <div class="info-cards">
+        <div class="info-card">
+          <span class="info-card-icon">🔍</span>
+          <h3>Reconnaissance</h3>
+          <p>Attackers profile targets to identify frequently visited sites</p>
+        </div>
+        <div class="info-card">
+          <span class="info-card-icon">💉</span>
+          <h3>Compromise</h3>
+          <p>The trusted site is hacked or ads are poisoned with malicious code</p>
+        </div>
+        <div class="info-card">
+          <span class="info-card-icon">🎯</span>
+          <h3>Delivery</h3>
+          <p>Visitors are redirected or prompted to install fake updates</p>
+        </div>
+      </div>
+      
+      <div class="navigation">
+        <button class="btn btn-secondary" onclick="previousSlide()">← Back</button>
+        <button class="btn" onclick="nextSlide()">Continue →</button>
+      </div>
+    </div>
+
+    <!-- Slide 3: Real Examples -->
+    <div class="slide" id="slide3">
+      <h2>🌍 Real-World Examples</h2>
+      <p>These actual watering hole attacks have targeted major organizations:</p>
+      
+      <div class="detection-challenge">
+        <h3 style="color:var(--dark-purple); margin-bottom:16px;">Notable Attacks:</h3>
+        <div class="site-card">
+          <strong>🏢 NotPetya (2017)</strong>
+          <p>Ukrainian accounting software was compromised, spreading ransomware globally</p>
+          <span class="url-display">Impact: $10+ billion in damages</span>
+        </div>
+        <div class="site-card">
+          <strong>🔧 CCleaner Attack (2017)</strong>
+          <p>Popular PC cleaning tool distributed malware to millions of users</p>
+          <span class="url-display">2.27 million infected systems</span>
+        </div>
+        <div class="site-card">
+          <strong>📱 iOS Developer Sites (2013)</strong>
+          <p>Apple developer forums compromised to target iOS developers</p>
+          <span class="url-display">Targeted high-value developer accounts</span>
+        </div>
+      </div>
+      
+      <div class="navigation">
+        <button class="btn btn-secondary" onclick="previousSlide()">← Back</button>
+        <button class="btn" onclick="nextSlide()">Next →</button>
+      </div>
+    </div>
+
+    <!-- Slide 4: How Organizations Are Targeted -->
+    <div class="slide" id="slide4">
+      <h2>🎯 How Organizations Are Targeted</h2>
+      <p>Attackers specifically target sites that employees frequently visit:</p>
+      
+      <div class="info-cards">
+        <div class="info-card">
+          <span class="info-card-icon">📰</span>
+          <h3>Tech News Sites</h3>
+          <p>Hacker News, TechCrunch, dev blogs</p>
+        </div>
+        <div class="info-card">
+          <span class="info-card-icon">🛠️</span>
+          <h3>Developer Tools</h3>
+          <p>Package repos, documentation sites, forums</p>
+        </div>
+        <div class="info-card">
+          <span class="info-card-icon">🤝</span>
+          <h3>Vendor Portals</h3>
+          <p>Supplier sites, partner portals, SaaS tools</p>
+        </div>
+        <div class="info-card">
+          <span class="info-card-icon">☁️</span>
+          <h3>Cloud Providers</h3>
+          <p>AWS, Azure, GCP documentation and consoles</p>
+        </div>
+      </div>
+      
+      <p style="text-align:center; color:var(--error-red); font-weight:600; margin-top:24px;">
+        ⚠️ Even trusted sites can be compromised!
+      </p>
+      
+      <div class="navigation">
+        <button class="btn btn-secondary" onclick="previousSlide()">← Back</button>
+        <button class="btn" onclick="nextSlide()">Next →</button>
+      </div>
+    </div>
+
+    <!-- Slide 5: Website Trust Challenge -->
+    <div class="slide" id="slide5">
+      <h2>🌐 Website Trust Challenge</h2>
+      <p>You're visiting a familiar vendor portal. Which scenario is most suspicious?</p>
+      
+      <div class="website-simulator">
+        <div class="browser-bar">
+          <div class="browser-controls">
+            <div class="browser-dot"></div>
+            <div class="browser-dot"></div>
+            <div class="browser-dot"></div>
+          </div>
+          <div class="url-bar" id="urlDisplay">https://vendor-portal.yourcompany.com</div>
+        </div>
+        <div class="website-content">
+          <h3 style="color:#333;">Vendor Portal</h3>
+          <p style="color:#666;">Welcome to the vendor management system</p>
+          <div class="fake-popup" id="fakePopup">
+            <h4 style="color:#ff3b30; margin-bottom:16px;">⚠️ Security Update Required</h4>
+            <p style="margin-bottom:16px;">Install our security plugin to continue</p>
+            <button class="btn btn-danger" onclick="showWarning()">Install Plugin</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="decision-grid">
+        <button class="decision-btn" onclick="trustDecision('normal')">Everything looks normal</button>
+        <button class="decision-btn" onclick="trustDecision('plugin')">Plugin request is suspicious</button>
+        <button class="decision-btn" onclick="trustDecision('url')">Check the URL carefully</button>
+        <button class="decision-btn" onclick="trustDecision('leave')">Leave the site immediately</button>
+      </div>
+      
+      <div id="trustFeedback" style="margin-top:24px;"></div>
+      
+      <div class="navigation">
+        <button class="btn btn-secondary" onclick="previousSlide()">← Back</button>
+        <button class="btn" onclick="nextSlide()" id="trustContinue" style="display:none;">Continue →</button>
+      </div>
+    </div>
+
+    <!-- Slide 6: URL Detection Game -->
+    <div class="slide" id="slide6">
+      <h2>🔍 Spot the Fake URLs</h2>
+      <p>Click on ALL the suspicious URLs that could be watering hole attacks:</p>
+      
+      <div class="detection-challenge">
+        <div class="site-card" onclick="checkURL(this, 'facebook.com', false)">
+          <strong>Social Media</strong>
+          <span class="url-display">facebook.com</span>
+        </div>
+        <div class="site-card" onclick="checkURL(this, 'amaz0n-secure-login.com', true)">
+          <strong>Online Shopping Login</strong>
+          <span class="url-display">amaz0n-secure-login.com</span>
+        </div>
+        <div class="site-card" onclick="checkURL(this, 'netflix.com', false)">
+          <strong>Streaming Service</strong>
+          <span class="url-display">netflix.com</span>
+        </div>
+        <div class="site-card" onclick="checkURL(this, 'paypa1-support.com', true)">
+          <strong>Payment Service</strong>
+          <span class="url-display">paypa1-support.com</span>
+        </div>
+        <div class="site-card" onclick="checkURL(this, 'wikipedia.org', false)">
+          <strong>Online Encyclopedia</strong>
+          <span class="url-display">wikipedia.org</span>
+        </div>
+        <div class="site-card" onclick="checkURL(this, 'micr0soft-update.com', true)">
+          <strong>Software Update</strong>
+          <span class="url-display">micr0soft-update.com</span>
+        </div>
+      </div>
+      
+      <div class="score-display">
+        Found: <span id="urlScore">0/3</span> suspicious URLs
+      </div>
+      
+      <div class="navigation">
+        <button class="btn btn-secondary" onclick="previousSlide()">← Back</button>
+        <button class="btn" onclick="nextSlide()" id="urlContinue" style="display:none;">Continue →</button>
+      </div>
+    </div>
+
+    <!-- Slide 7: Response Simulation -->
+    <div class="slide" id="slide7">
+      <h2>🚨 Incident Response Simulation</h2>
+      <p>You clicked "Sign in" on a familiar cloud provider site and were redirected to:</p>
+      
+      <div class="website-simulator">
+        <div class="browser-bar">
+          <div class="browser-controls">
+            <div class="browser-dot"></div>
+            <div class="browser-dot"></div>
+            <div class="browser-dot"></div>
+          </div>
+          <div class="url-bar">
+            <span class="suspicious-url">aws-console-signin.net</span>
+          </div>
+        </div>
+        <div class="website-content" style="text-align:center;">
+          <h3 style="color:#ff6b00; margin-bottom:24px;">AWS Management Console</h3>
+          <div style="max-width:400px; margin:0 auto;">
+            <input type="text" placeholder="Username" style="width:100%; padding:12px; margin:8px 0; border:1px solid #ddd; border-radius:4px;">
+            <input type="password" placeholder="Password" style="width:100%; padding:12px; margin:8px 0; border:1px solid #ddd; border-radius:4px;">
+            <button style="width:100%; padding:12px; background:#ff6b00; color:white; border:none; border-radius:4px; font-size:16px; cursor:pointer;">Sign In</button>
+          </div>
+        </div>
+      </div>
+      
+      <p style="text-align:center; font-weight:600; margin-top:24px;">What should you do?</p>
+      
+      <div class="decision-grid">
+        <button class="decision-btn" onclick="responseDecision('login')">Log in if the page looks legitimate</button>
+        <button class="decision-btn" onclick="responseDecision('verify')">Verify the URL and use bookmarks</button>
+        <button class="decision-btn" onclick="responseDecision('password')">Enter credentials then change password</button>
+        <button class="decision-btn" onclick="responseDecision('report')">Close immediately and report to Security</button>
+      </div>
+      
+      <div id="responseFeedback" style="margin-top:24px;"></div>
+      
+      <div class="navigation">
+        <button class="btn btn-secondary" onclick="previousSlide()">← Back</button>
+        <button class="btn" onclick="completeTraining()" id="responseContinue" style="display:none;">Complete Training →</button>
+      </div>
+    </div>
+
+    <!-- Slide 8: Certificate -->
+    <div class="slide" id="slide8">
+      <div class="certificate">
+        <div class="trophy-icon">🏆</div>
+        <h1 style="color:var(--primary-purple); margin:24px 0;">Watering Hole Defense Champion!</h1>
+        <p style="font-size:1.25rem; color:var(--dark-purple); margin-bottom:32px;">
+          You've mastered defending against watering hole attacks!
+        </p>
+
+        <div style="margin:32px 0;">
+          <div>
+            <div style="font-size:2rem; font-weight:700; color:var(--primary-purple);" id="finalScore">100%</div>
+            <div style="color:#6c757d;">Final Score</div>
+          </div>
+        </div>
+
+        <p style="color:var(--primary-purple); font-weight:600; font-size:1.125rem;">
+          Stay Vigilant. Stay Secure. 👾
+        </p>
+        
+        <button class="btn" onclick="window.close()" style="margin-top:24px;">Exit Training</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="scorm-status" id="scormStatus">SCORM: Disconnected</div>
+
+  <script>
+    // SCORM API wrapper
+    var scorm = {
+      version: null, api: null,
+      init: function() {
+        try {
+          this.api = this.getAPI();
+          if (this.api) {
+            this.version = this.getVersion();
+            var result = this.api.LMSInitialize ? this.api.LMSInitialize("") : this.api.Initialize("");
+            if (result == "true") {
+              this.setStatus("initialized");
+              this.setValue("cmi.core.lesson_status", "incomplete");
+              this.setValue("cmi.core.score.min", "0");
+              this.setValue("cmi.core.score.max", "100");
+              this.setValue("cmi.core.score.raw", "0");
+              this.commit();
+              return true;
+            }
+          }
+        } catch(e) { console.log("SCORM API not available - standalone mode"); }
+        return false;
+      },
+      getAPI: function() {
+        var api=null; if (window.parent && window.parent!=window) api=this.findAPI(window.parent);
+        if (!api && window.opener) api=this.findAPI(window.opener);
+        if (!api) api=this.findAPI(window);
+        return api;
+      },
+      findAPI: function(win) {
+        var i=0; while(!win.API && !win.API_1484_11 && win.parent && win.parent!=win && i<500){ i++; win=win.parent; }
+        return win.API || win.API_1484_11;
+      },
+      getVersion: function(){ if(this.api){ if(this.api.LMSInitialize) return "1.2"; if(this.api.Initialize) return "2004";} return null; },
+      getValue: function(e){ if(!this.api) return ""; return this.version=="1.2"? this.api.LMSGetValue(e): this.api.GetValue(e); },
+      setValue: function(e,v){ if(!this.api) return false; return this.version=="1.2"? this.api.LMSSetValue(e,v): this.api.SetValue(e,v); },
+      commit: function(){ if(!this.api) return false; return this.version=="1.2"? this.api.LMSCommit(""): this.api.Commit(""); },
+      finish: function(){ if(!this.api) return false; return this.version=="1.2"? this.api.LMSFinish(""): this.api.Terminate(""); },
+      setStatus: function(status){ var el=document.getElementById('scormStatus'); if(el){ el.textContent='SCORM: '+status; el.style.display='block'; } }
+    };
+    
+    // Game state management
+    let gameState = {
+      currentSlide: 1,
+      totalSlides: 8,
+      userScore: 0,
+      achievements: [],
+      trustComplete: false,
+      urlsFound: 0,
+      totalSuspiciousUrls: 3,
+      urlsChecked: [],
+      responseComplete: false,
+      scenariosCompleted: 0,
+      totalScenarios: 3,
+      choices: {}
+    };
+    
+    
+    // Achievement system
+    function showAchievement(icon, title, text) {
+      const popup = document.getElementById('achievementPopup');
+      document.getElementById('achievementIcon').textContent = icon;
+      document.getElementById('achievementTitle').textContent = title;
+      document.getElementById('achievementText').textContent = text;
+      
+      popup.classList.add('show');
+      setTimeout(() => {
+        popup.classList.remove('show');
+      }, 3000);
+    }
+    
+    // Website trust challenge
+    function trustDecision(choice) {
+      const trustKey = `trust_decision`;
+      
+      const feedbackDiv = document.getElementById('trustFeedback');
+      const popup = document.getElementById('fakePopup');
+      const buttons = document.querySelectorAll('#slide5 .decision-btn');
+      
+      // Save the choice
+      gameState.choices[trustKey] = choice;
+      saveChoice(trustKey, choice);
+      
+      feedbackDiv.innerHTML = '';
+      
+      // Clear all button styling and indicators first
+      buttons.forEach(btn => {
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.style.fontWeight = '';
+        btn.style.border = '';
+        btn.style.opacity = '';
+        btn.style.transform = '';
+        btn.style.boxShadow = '';
+        btn.style.position = '';
+        btn.style.zIndex = '';
+        // Remove any existing indicators
+        const existingIndicator = btn.querySelector('.action-indicator');
+        if (existingIndicator) existingIndicator.remove();
+        const existingLabel = btn.querySelector('.action-label');
+        if (existingLabel) existingLabel.remove();
+      });
+      
+      // Find the clicked button
+      let clickedButton;
+      buttons.forEach(btn => {
+        if ((choice === 'normal' && btn.textContent.includes('Everything looks normal')) ||
+            (choice === 'plugin' && btn.textContent.includes('Plugin request is suspicious')) ||
+            (choice === 'url' && btn.textContent.includes('Check the URL carefully')) ||
+            (choice === 'leave' && btn.textContent.includes('Leave the site immediately'))) {
+          clickedButton = btn;
+        }
+      });
+      
+      // Make non-selected buttons slightly faded but still readable
+      buttons.forEach(btn => {
+        if (btn !== clickedButton) {
+          btn.style.opacity = '0.7';
+          btn.style.transform = 'scale(0.98)';
+        }
+      });
+      
+      switch(choice) {
+        case 'normal':
+          feedbackDiv.innerHTML = `<div class="feedback incorrect" style="display:block;">
+            ❌ Look more carefully! Did you notice the security plugin popup?
+          </div>`;
+          if (clickedButton) {
+            clickedButton.style.background = 'linear-gradient(135deg, #f44336, #C62828)';
+            clickedButton.style.color = 'white';
+            clickedButton.style.fontWeight = 'bold';
+            clickedButton.style.border = '4px solid #C62828';
+            clickedButton.style.transform = 'scale(1.12)';
+            clickedButton.style.boxShadow = '0 8px 30px rgba(244,67,54,0.4), 0 0 25px rgba(244,67,54,0.3)';
+            clickedButton.style.opacity = '1';
+            clickedButton.style.position = 'relative';
+            clickedButton.style.zIndex = '100';
+            
+            const icon = document.createElement('span');
+            icon.className = 'action-indicator';
+            icon.style.cssText = 'margin-right: 12px; font-size: 1.6em; vertical-align: middle;';
+            icon.textContent = '❌';
+            clickedButton.insertBefore(icon, clickedButton.firstChild);
+            
+            const label = document.createElement('div');
+            label.className = 'action-label';
+            label.style.cssText = `
+              position: absolute;
+              top: -30px;
+              left: 50%;
+              transform: translateX(-50%);
+              background: #f44336;
+              color: white;
+              padding: 4px 12px;
+              border-radius: 15px;
+              font-size: 12px;
+              font-weight: bold;
+              white-space: nowrap;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            `;
+            label.textContent = '🎯 YOUR CHOICE';
+            clickedButton.appendChild(label);
+          }
+          break;
+        case 'plugin':
+          feedbackDiv.innerHTML = `<div class="feedback correct" style="display:block;">
+            ✅ Excellent! Legitimate sites never require browser plugins for basic access. This is a major red flag!
+          </div>`;
+          if (clickedButton) {
+            clickedButton.style.background = 'linear-gradient(135deg, #4CAF50, #2E7D32)';
+            clickedButton.style.color = 'white';
+            clickedButton.style.fontWeight = 'bold';
+            clickedButton.style.border = '4px solid #2E7D32';
+            clickedButton.style.transform = 'scale(1.12)';
+            clickedButton.style.boxShadow = '0 8px 30px rgba(76,175,80,0.4), 0 0 25px rgba(76,175,80,0.3)';
+            clickedButton.style.opacity = '1';
+            clickedButton.style.position = 'relative';
+            clickedButton.style.zIndex = '100';
+            
+            const icon = document.createElement('span');
+            icon.className = 'action-indicator';
+            icon.style.cssText = 'margin-right: 12px; font-size: 1.6em; vertical-align: middle;';
+            icon.textContent = '✅';
+            clickedButton.insertBefore(icon, clickedButton.firstChild);
+            
+            const label = document.createElement('div');
+            label.className = 'action-label';
+            label.style.cssText = `
+              position: absolute;
+              top: -30px;
+              left: 50%;
+              transform: translateX(-50%);
+              background: #4CAF50;
+              color: white;
+              padding: 4px 12px;
+              border-radius: 15px;
+              font-size: 12px;
+              font-weight: bold;
+              white-space: nowrap;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            `;
+            label.textContent = '🎯 YOUR CHOICE';
+            clickedButton.appendChild(label);
+          }
+          showAchievement('🛡️', 'Plugin Detector', 'Spotted malicious plugin request!');
+          gameState.trustComplete = true;
+          document.getElementById('trustContinue').style.display = 'inline-flex';
+          document.querySelectorAll('#slide5 .decision-btn').forEach(btn => {
+            btn.classList.add('disabled');
+          });
+          break;
+        case 'url':
+          feedbackDiv.innerHTML = `<div class="feedback warning" style="display:block;">
+            ⚠️ Good instinct to check URLs, but did you see the plugin request?
+          </div>`;
+          if (clickedButton) {
+            clickedButton.style.background = 'linear-gradient(135deg, #ff9800, #E65100)';
+            clickedButton.style.color = 'white';
+            clickedButton.style.fontWeight = 'bold';
+            clickedButton.style.border = '4px solid #E65100';
+            clickedButton.style.transform = 'scale(1.12)';
+            clickedButton.style.boxShadow = '0 8px 30px rgba(255,152,0,0.4), 0 0 25px rgba(255,152,0,0.3)';
+            clickedButton.style.opacity = '1';
+            clickedButton.style.position = 'relative';
+            clickedButton.style.zIndex = '100';
+            
+            const icon = document.createElement('span');
+            icon.className = 'action-indicator';
+            icon.style.cssText = 'margin-right: 12px; font-size: 1.6em; vertical-align: middle;';
+            icon.textContent = '⚠️';
+            clickedButton.insertBefore(icon, clickedButton.firstChild);
+            
+            const label = document.createElement('div');
+            label.className = 'action-label';
+            label.style.cssText = `
+              position: absolute;
+              top: -30px;
+              left: 50%;
+              transform: translateX(-50%);
+              background: #ff9800;
+              color: white;
+              padding: 4px 12px;
+              border-radius: 15px;
+              font-size: 12px;
+              font-weight: bold;
+              white-space: nowrap;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            `;
+            label.textContent = '🎯 YOUR CHOICE';
+            clickedButton.appendChild(label);
+          }
+          break;
+        case 'leave':
+          feedbackDiv.innerHTML = `<div class="feedback warning" style="display:block;">
+            ⚠️ Leaving is safe, but identifying the specific threat (plugin request) is important too!
+          </div>`;
+          if (clickedButton) {
+            clickedButton.style.background = 'linear-gradient(135deg, #ff9800, #E65100)';
+            clickedButton.style.color = 'white';
+            clickedButton.style.fontWeight = 'bold';
+            clickedButton.style.border = '4px solid #E65100';
+            clickedButton.style.transform = 'scale(1.12)';
+            clickedButton.style.boxShadow = '0 8px 30px rgba(255,152,0,0.4), 0 0 25px rgba(255,152,0,0.3)';
+            clickedButton.style.opacity = '1';
+            clickedButton.style.position = 'relative';
+            clickedButton.style.zIndex = '100';
+            
+            const icon = document.createElement('span');
+            icon.className = 'action-indicator';
+            icon.style.cssText = 'margin-right: 12px; font-size: 1.6em; vertical-align: middle;';
+            icon.textContent = '⚠️';
+            clickedButton.insertBefore(icon, clickedButton.firstChild);
+            
+            const label = document.createElement('div');
+            label.className = 'action-label';
+            label.style.cssText = `
+              position: absolute;
+              top: -30px;
+              left: 50%;
+              transform: translateX(-50%);
+              background: #ff9800;
+              color: white;
+              padding: 4px 12px;
+              border-radius: 15px;
+              font-size: 12px;
+              font-weight: bold;
+              white-space: nowrap;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            `;
+            label.textContent = '🎯 YOUR CHOICE';
+            clickedButton.appendChild(label);
+          }
+          break;
+      }
+    }
+    
+    function showWarning() {
+      showPluginWarningPopup();
+    }
+
+    function showPluginWarningPopup() {
+      const popupHTML = `
+        <div id="pluginWarningPopup" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0); display: flex; align-items: center; justify-content: center; z-index: 2000; transition: background 0.3s ease;">
+          <div id="pluginWarningContent" style="background: white; border-radius: 16px; width: 90%; max-width: 500px; padding: 40px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3); transform: scale(0.7); opacity: 0; transition: all 0.3s ease;">
+            <div style="font-size: 64px; margin-bottom: 20px;">🚨</div>
+            <h2 style="color: #f44336; margin-bottom: 16px;">Malware Alert!</h2>
+            <p style="color: #666; font-size: 16px; margin-bottom: 24px; line-height: 1.6;">
+              <strong>NEVER install plugins from websites!</strong><br><br>
+              This is exactly how watering hole attacks spread malware. Compromised legitimate sites trick you into installing malicious software.
+            </p>
+            <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 16px; border-radius: 4px; margin-bottom: 24px; text-align: left;">
+              <p style="margin: 0; color: #856404; font-size: 14px; line-height: 1.5;">
+                <strong>🛡️ Red Flags:</strong><br>
+                • Unexpected plugin request<br>
+                • Popup on trusted site (site compromised)<br>
+                • Claims to be "security update"<br>
+                • No official verification process
+              </p>
+            </div>
+            <button onclick="closePluginWarningPopup()" style="background: linear-gradient(135deg, #7B2CBF 0%, #06A77D 100%); color: white; border: none; padding: 12px 32px; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: 600; transition: all 0.2s ease;">
+              I Understand
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', popupHTML);
+
+      // Trigger animation immediately
+      requestAnimationFrame(() => {
+        const popup = document.getElementById('pluginWarningPopup');
+        const content = document.getElementById('pluginWarningContent');
+        if (popup && content) {
+          popup.style.background = 'rgba(0,0,0,0.7)';
+          content.style.transform = 'scale(1)';
+          content.style.opacity = '1';
+        }
+      });
+    }
+
+    function closePluginWarningPopup() {
+      const popup = document.getElementById('pluginWarningPopup');
+      const content = document.getElementById('pluginWarningContent');
+
+      if (popup && content) {
+        // Animate out
+        popup.style.background = 'rgba(0,0,0,0)';
+        content.style.transform = 'scale(0.7)';
+        content.style.opacity = '0';
+
+        // Remove after animation completes
+        setTimeout(() => {
+          popup.remove();
+        }, 300);
+      }
+    }
+    
+    // URL detection game
+    // Move urlsChecked to gameState for proper persistence
+    function checkURL(element, url, isSuspicious) {
+      if (!gameState.urlsChecked) gameState.urlsChecked = [];
+      
+      // Check if already clicked - if so, just show feedback
+      if (gameState.urlsChecked.includes(url)) {
+        // Already checked - just show the visual feedback again
+        if (isSuspicious) {
+          alert('✅ You already identified this suspicious URL!');
+        } else {
+          alert('✅ You already checked this legitimate URL.');
+        }
+        return;
+      }
+      
+      gameState.urlsChecked.push(url);
+      const urlKey = `url_${url}`;
+      gameState.choices[urlKey] = true;
+      saveChoice(urlKey, true);
+      
+      if (isSuspicious) {
+        element.classList.add('correct');
+        gameState.urlsFound++;
+        
+        if (gameState.urlsFound === 1) {
+          showAchievement('👁️', 'Sharp Eye', 'Found your first suspicious URL!');
+        }
+      } else {
+        element.classList.add('incorrect');
+      }
+      
+      document.getElementById('urlScore').textContent = gameState.urlsFound + '/' + gameState.totalSuspiciousUrls;
+      
+      if (gameState.urlsFound === gameState.totalSuspiciousUrls) {
+        showAchievement('🔍', 'URL Master', 'Found all suspicious URLs!');
+        document.getElementById('urlContinue').style.display = 'inline-flex';
+      }
+    }
+    
+    // Response simulation
+    function responseDecision(choice) {
+      const responseKey = `response_decision`;
+      
+      const feedbackDiv = document.getElementById('responseFeedback');
+      const buttons = document.querySelectorAll('#slide7 .decision-btn');
+      
+      // Save the choice
+      gameState.choices[responseKey] = choice;
+      saveChoice(responseKey, choice);
+      
+      feedbackDiv.innerHTML = '';
+      
+      // Clear all button styling and indicators first
+      buttons.forEach(btn => {
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.style.fontWeight = '';
+        btn.style.border = '';
+        btn.style.opacity = '';
+        btn.style.transform = '';
+        btn.style.boxShadow = '';
+        btn.style.position = '';
+        btn.style.zIndex = '';
+        // Remove any existing indicators
+        const existingIndicator = btn.querySelector('.action-indicator');
+        if (existingIndicator) existingIndicator.remove();
+        const existingLabel = btn.querySelector('.action-label');
+        if (existingLabel) existingLabel.remove();
+      });
+      
+      // Find the clicked button
+      let clickedButton;
+      buttons.forEach(btn => {
+        if ((choice === 'login' && btn.textContent.includes('Log in if the page')) ||
+            (choice === 'verify' && btn.textContent.includes('Verify the URL')) ||
+            (choice === 'password' && btn.textContent.includes('Enter credentials then')) ||
+            (choice === 'report' && btn.textContent.includes('Close immediately and report'))) {
+          clickedButton = btn;
+        }
+      });
+      
+      // Make non-selected buttons slightly faded but still readable
+      buttons.forEach(btn => {
+        if (btn !== clickedButton) {
+          btn.style.opacity = '0.7';
+          btn.style.transform = 'scale(0.98)';
+        }
+      });
+      
+      switch(choice) {
+        case 'login':
+          feedbackDiv.innerHTML = `<div class="feedback incorrect" style="display:block;">
+            ❌ NEVER enter credentials on suspicious domains! This is a phishing site using a look-alike domain.
+          </div>`;
+          if (clickedButton) {
+            clickedButton.style.background = 'linear-gradient(135deg, #f44336, #C62828)';
+            clickedButton.style.color = 'white';
+            clickedButton.style.fontWeight = 'bold';
+            clickedButton.style.border = '4px solid #C62828';
+            clickedButton.style.transform = 'scale(1.12)';
+            clickedButton.style.boxShadow = '0 8px 30px rgba(244,67,54,0.4), 0 0 25px rgba(244,67,54,0.3)';
+            clickedButton.style.opacity = '1';
+            clickedButton.style.position = 'relative';
+            clickedButton.style.zIndex = '100';
+            
+            const icon = document.createElement('span');
+            icon.className = 'action-indicator';
+            icon.style.cssText = 'margin-right: 12px; font-size: 1.6em; vertical-align: middle;';
+            icon.textContent = '❌';
+            clickedButton.insertBefore(icon, clickedButton.firstChild);
+            
+            const label = document.createElement('div');
+            label.className = 'action-label';
+            label.style.cssText = `
+              position: absolute;
+              top: -30px;
+              left: 50%;
+              transform: translateX(-50%);
+              background: #f44336;
+              color: white;
+              padding: 4px 12px;
+              border-radius: 15px;
+              font-size: 12px;
+              font-weight: bold;
+              white-space: nowrap;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            `;
+            label.textContent = '🎯 YOUR CHOICE';
+            clickedButton.appendChild(label);
+          }
+          showAchievement('⚠️', 'Close Call', 'Learn from this mistake!');
+          break;
+        case 'verify':
+          feedbackDiv.innerHTML = `<div class="feedback correct" style="display:block;">
+            ✅ Perfect! Always verify URLs and use bookmarks or type the URL directly. The real AWS domain is aws.amazon.com, not aws-console-signin.net!
+          </div>`;
+          if (clickedButton) {
+            clickedButton.style.background = 'linear-gradient(135deg, #4CAF50, #2E7D32)';
+            clickedButton.style.color = 'white';
+            clickedButton.style.fontWeight = 'bold';
+            clickedButton.style.border = '4px solid #2E7D32';
+            clickedButton.style.transform = 'scale(1.12)';
+            clickedButton.style.boxShadow = '0 8px 30px rgba(76,175,80,0.4), 0 0 25px rgba(76,175,80,0.3)';
+            clickedButton.style.opacity = '1';
+            clickedButton.style.position = 'relative';
+            clickedButton.style.zIndex = '100';
+            
+            const icon = document.createElement('span');
+            icon.className = 'action-indicator';
+            icon.style.cssText = 'margin-right: 12px; font-size: 1.6em; vertical-align: middle;';
+            icon.textContent = '✅';
+            clickedButton.insertBefore(icon, clickedButton.firstChild);
+            
+            const label = document.createElement('div');
+            label.className = 'action-label';
+            label.style.cssText = `
+              position: absolute;
+              top: -30px;
+              left: 50%;
+              transform: translateX(-50%);
+              background: #4CAF50;
+              color: white;
+              padding: 4px 12px;
+              border-radius: 15px;
+              font-size: 12px;
+              font-weight: bold;
+              white-space: nowrap;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            `;
+            label.textContent = '🎯 YOUR CHOICE';
+            clickedButton.appendChild(label);
+          }
+          showAchievement('🔒', 'Security Pro', 'Avoided credential theft!');
+          gameState.responseComplete = true;
+          document.getElementById('responseContinue').style.display = 'inline-flex';
+          document.querySelectorAll('#slide7 .decision-btn').forEach(btn => {
+            btn.classList.add('disabled');
+          });
+          break;
+        case 'password':
+          feedbackDiv.innerHTML = `<div class="feedback incorrect" style="display:block;">
+            ❌ Never enter credentials first! Once entered, attackers have them immediately.
+          </div>`;
+          if (clickedButton) {
+            clickedButton.style.background = 'linear-gradient(135deg, #f44336, #C62828)';
+            clickedButton.style.color = 'white';
+            clickedButton.style.fontWeight = 'bold';
+            clickedButton.style.border = '4px solid #C62828';
+            clickedButton.style.transform = 'scale(1.12)';
+            clickedButton.style.boxShadow = '0 8px 30px rgba(244,67,54,0.4), 0 0 25px rgba(244,67,54,0.3)';
+            clickedButton.style.opacity = '1';
+            clickedButton.style.position = 'relative';
+            clickedButton.style.zIndex = '100';
+            
+            const icon = document.createElement('span');
+            icon.className = 'action-indicator';
+            icon.style.cssText = 'margin-right: 12px; font-size: 1.6em; vertical-align: middle;';
+            icon.textContent = '❌';
+            clickedButton.insertBefore(icon, clickedButton.firstChild);
+            
+            const label = document.createElement('div');
+            label.className = 'action-label';
+            label.style.cssText = `
+              position: absolute;
+              top: -30px;
+              left: 50%;
+              transform: translateX(-50%);
+              background: #f44336;
+              color: white;
+              padding: 4px 12px;
+              border-radius: 15px;
+              font-size: 12px;
+              font-weight: bold;
+              white-space: nowrap;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            `;
+            label.textContent = '🎯 YOUR CHOICE';
+            clickedButton.appendChild(label);
+          }
+          break;
+        case 'report':
+          feedbackDiv.innerHTML = `<div class="feedback correct" style="display:block;">
+            ✅ Excellent! Closing the page immediately and reporting to Security is a safe response. This prevents credential theft and alerts the security team.
+          </div>`;
+          if (clickedButton) {
+            clickedButton.style.background = 'linear-gradient(135deg, #4CAF50, #2E7D32)';
+            clickedButton.style.color = 'white';
+            clickedButton.style.fontWeight = 'bold';
+            clickedButton.style.border = '4px solid #2E7D32';
+            clickedButton.style.transform = 'scale(1.12)';
+            clickedButton.style.boxShadow = '0 8px 30px rgba(76,175,80,0.4), 0 0 25px rgba(76,175,80,0.3)';
+            clickedButton.style.opacity = '1';
+            clickedButton.style.position = 'relative';
+            clickedButton.style.zIndex = '100';
+            
+            const icon = document.createElement('span');
+            icon.className = 'action-indicator';
+            icon.style.cssText = 'margin-right: 12px; font-size: 1.6em; vertical-align: middle;';
+            icon.textContent = '✅';
+            clickedButton.insertBefore(icon, clickedButton.firstChild);
+            
+            const label = document.createElement('div');
+            label.className = 'action-label';
+            label.style.cssText = `
+              position: absolute;
+              top: -30px;
+              left: 50%;
+              transform: translateX(-50%);
+              background: #4CAF50;
+              color: white;
+              padding: 4px 12px;
+              border-radius: 15px;
+              font-size: 12px;
+              font-weight: bold;
+              white-space: nowrap;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            `;
+            label.textContent = '🎯 YOUR CHOICE';
+            clickedButton.appendChild(label);
+          }
+          showAchievement('🔒', 'Security Pro', 'Great incident response!');
+          gameState.responseComplete = true;
+          document.getElementById('responseContinue').style.display = 'inline-flex';
+          document.querySelectorAll('#slide7 .decision-btn').forEach(btn => {
+            btn.classList.add('disabled');
+          });
+          break;
+      }
+    }
+    
+    // Knowledge check scenarios
+    function loadScenarios() {
+      const scenarios = [
+        {
+          title: 'Plugin Installation Request',
+          type: 'plugin',
+          description: 'Which scenario is the clearest sign of a watering hole attack?',
+          options: [
+            { text: 'A well-known vendor portal asks you to install an "urgent security plugin" before continuing', feedback: 'Correct — malicious prompts on trusted sites are a hallmark of watering hole attacks.', correct: true },
+            { text: 'Your browser froze and needed a restart', feedback: 'Hangs can happen for many benign reasons. Not sufficient by itself.', correct: false },
+            { text: 'A bookmarked site is down for maintenance', feedback: 'Maintenance happens; not evidence of compromise on its own.', correct: false }
+          ]
+        },
+        {
+          title: 'Suspicious Redirect',
+          type: 'redirect',
+          description: 'You click "Sign in" on a familiar supplier site and land on suppliers-login-secure.net. Best next step?',
+          options: [
+            { text: 'Proceed if the page looks normal', feedback: 'Appearance can be spoofed; don\'t trust looks alone.', correct: false },
+            { text: 'Stop, verify the URL, and access via your known bookmark or official link', feedback: 'Correct — verify the URL and use trusted bookmarks to avoid look‑alike domains.', correct: true },
+            { text: 'Enter credentials and change your password later', feedback: 'Never enter credentials on a suspicious page.', correct: false }
+          ]
+        },
+        {
+          title: 'Incident Response',
+          type: 'response',
+          description: 'You suspect an industry news site you visit was compromised. What should you do first?',
+          options: [
+            { text: 'Report it to Security and avoid using the site; if something ran, disconnect from the network', feedback: 'Correct — report to Security and isolate impacted systems.', correct: true },
+            { text: 'Post a warning in a public forum', feedback: 'Public posts can tip attackers or cause confusion; use internal channels.', correct: false },
+            { text: 'Install whatever update the site recommends to fix it', feedback: 'Never install unverified updates suggested by websites.', correct: false }
+          ]
+        }
+      ];
+      
+      const container = document.getElementById('scenarioContainer');
+      
+      // Clear existing scenarios to prevent duplicates
+      container.innerHTML = '';
+      
+      scenarios.forEach((scenario, index) => {
+        const scenarioDiv = document.createElement('div');
+        scenarioDiv.style.cssText = 'background:#f8f9fa;padding:24px;border-radius:12px;margin-bottom:24px;border:2px solid #dee2e6;';
+        
+        const icon = scenario.type === 'plugin' ? '🔌' : scenario.type === 'redirect' ? '🔄' : '🚨';
+        
+        scenarioDiv.innerHTML = `
+          <h3 style="color:var(--dark-purple);margin-bottom:16px;">${icon} Scenario ${index + 1}: ${scenario.title}</h3>
+          <p style="margin-bottom:20px;font-style:italic;">${scenario.description}</p>
+          <div id="scenario${index}Options" style="display:grid;gap:12px;">
+            ${scenario.options.map((opt, i) => 
+              `<button class="btn btn-secondary" style="text-align:left;padding:16px;" onclick="scenarioResponse(${index}, ${i})">${opt.text}</button>`
+            ).join('')}
+          </div>
+          <div id="scenario${index}Feedback" style="margin-top:16px;"></div>
+        `;
+        
+        container.appendChild(scenarioDiv);
+      });
+    }
+    
+    function scenarioResponse(scenarioIndex, optionIndex) {
+      const choiceKey = `scenario_${scenarioIndex}`;
+      
+      // Save the choice
+      gameState.choices[choiceKey] = optionIndex;
+      saveChoice(choiceKey, optionIndex);
+      const scenarios = [
+        {
+          options: [
+            { feedback: 'Correct — malicious prompts on trusted sites are a hallmark of watering hole attacks.', correct: true },
+            { feedback: 'Hangs can happen for many benign reasons. Not sufficient by itself.', correct: false },
+            { feedback: 'Maintenance happens; not evidence of compromise on its own.', correct: false }
+          ]
+        },
+        {
+          options: [
+            { feedback: 'Appearance can be spoofed; don\'t trust looks alone.', correct: false },
+            { feedback: 'Correct — verify the URL and use trusted bookmarks to avoid look‑alike domains.', correct: true },
+            { feedback: 'Never enter credentials on a suspicious page.', correct: false }
+          ]
+        },
+        {
+          options: [
+            { feedback: 'Correct — report to Security and isolate impacted systems.', correct: true },
+            { feedback: 'Public posts can tip attackers or cause confusion; use internal channels.', correct: false },
+            { feedback: 'Never install unverified updates suggested by websites.', correct: false }
+          ]
+        }
+      ];
+      
+      const scenario = scenarios[scenarioIndex];
+      const option = scenario.options[optionIndex];
+      const feedbackDiv = document.getElementById(`scenario${scenarioIndex}Feedback`);
+      const buttons = document.querySelectorAll(`#scenario${scenarioIndex}Options button`);
+      
+      // Clear previous styling from all buttons first
+      buttons.forEach(btn => {
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.style.fontWeight = '';
+        btn.style.border = '';
+        btn.style.opacity = '';
+      });
+      
+      // Highlight the selected button
+      buttons[optionIndex].style.background = option.correct ? 'linear-gradient(135deg, #4CAF50, #45a049)' : 'linear-gradient(135deg, #ff9800, #f57c00)';
+      buttons[optionIndex].style.color = 'white';
+      buttons[optionIndex].style.fontWeight = '600';
+      buttons[optionIndex].style.border = option.correct ? '2px solid #4CAF50' : '2px solid #ff9800';
+      
+      if (option.correct) {
+        feedbackDiv.innerHTML = `<div class="feedback correct" style="display:block;">
+          ✅ ${option.feedback}
+        </div>`;
+        
+        // Disable all buttons for this scenario ONLY after correct answer
+        buttons.forEach(btn => {
+          btn.disabled = true;
+          btn.classList.add('disabled');
+        });
+        
+        if (!gameState.scenariosCompleted) gameState.scenariosCompleted = 0;
+        gameState.scenariosCompleted++;
+        
+        if (gameState.scenariosCompleted === gameState.totalScenarios) {
+          document.getElementById('completeBtn').style.display = 'inline-flex';
+          if (!gameState.achievements.includes('scenario_master')) {
+            gameState.achievements.push('scenario_master');
+            showAchievement('🎯', 'Scenario Master', 'Completed all knowledge checks!');
+          }
+        }
+      } else {
+        feedbackDiv.innerHTML = `<div class="feedback incorrect" style="display:block;">
+          ❌ ${option.feedback} Try again!
+        </div>`;
+        // Mark the incorrect button with orange but keep enabled
+        buttons[optionIndex].style.opacity = '0.7';
+      }
+    }
+    
+    // Navigation
+    function updateProgress() {
+      document.getElementById('progressBar').style.width = (gameState.currentSlide / gameState.totalSlides) * 100 + '%';
+    }
+    
+    function showSlide(n) {
+      document.querySelectorAll('.slide').forEach(slide => slide.classList.remove('active'));
+      document.getElementById('slide' + n).classList.add('active');
+      gameState.currentSlide = n;
+      updateProgress();
+      updateSCORM();
+      
+      // Notify parent frame if embedded
+      if (window.parent !== window) {
+        window.parent.postMessage({
+          type: 'slideChange',
+          slide: n,
+          module: 'watering'
+        }, '*');
+      }
+      
+      // Show fake popup when reaching slide 5
+      if (n === 5) {
+        setTimeout(() => {
+          const popup = document.getElementById('fakePopup');
+          if (popup) {
+            popup.classList.add('show');
+          }
+        }, 800);
+        // Restore choices with minimal delay
+        if (gameState.choices && Object.keys(gameState.choices).length > 0) {
+          setTimeout(restoreChoices, 50);
+        }
+      }
+      
+      // Restore choices when reaching slide 6 (URL detection)
+      if (n === 6) {
+        if (gameState.choices && Object.keys(gameState.choices).length > 0) {
+          setTimeout(restoreChoices, 50);
+        }
+      }
+      
+      // Restore choices when reaching slide 7
+      if (n === 7) {
+        if (gameState.choices && Object.keys(gameState.choices).length > 0) {
+          setTimeout(restoreChoices, 50);
+        }
+      }
+      
+    }
+    
+    function nextSlide() {
+      if (gameState.currentSlide < gameState.totalSlides) {
+        showSlide(gameState.currentSlide + 1);
+      }
+    }
+    
+    function previousSlide() {
+      if (gameState.currentSlide > 1) {
+        showSlide(gameState.currentSlide - 1);
+      }
+    }
+    
+    function startTraining() {
+      showAchievement('🚀', 'Training Started!', 'Your watering hole defense journey begins!');
+      nextSlide();
+    }
+    
+    // Completion
+    function completeTraining() {
+      
+      // Set to 100% since they completed all simulations
+      const finalScore = 100;
+      
+      document.getElementById('finalScore').textContent = finalScore + '%';
+      
+      // Notify parent frame if embedded
+      if (window.parent !== window) {
+        window.parent.postMessage({
+          type: 'moduleComplete',
+          module: 'watering'
+        }, '*');
+      }
+      
+      // Update SCORM
+      scorm.setValue('cmi.core.score.raw', String(finalScore));
+      scorm.setValue('cmi.core.lesson_status', finalScore >= 80 ? 'passed' : 'completed');
+      scorm.commit();
+      
+      showSlide(8);
+      launchConfetti();
+      showAchievement('🏆', 'Training Complete!', 'You are now a Watering Hole Defense Expert!');
+    }
+    
+    function launchConfetti() {
+      const container = document.getElementById('confettiContainer');
+      container.style.display = 'block';
+      const colors = ['#7B2CBF', '#4CAF50', '#FFD700', '#FF6B6B', '#4ECDC4'];
+      
+      for (let i = 0; i < 100; i++) {
+        setTimeout(() => {
+          const confetti = document.createElement('div');
+          confetti.className = 'confetti';
+          confetti.style.left = Math.random() * 100 + '%';
+          confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+          confetti.style.width = (Math.random() * 10 + 5) + 'px';
+          confetti.style.height = confetti.style.width;
+          confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+          confetti.style.animationDelay = Math.random() * 0.5 + 's';
+          container.appendChild(confetti);
+          
+          setTimeout(() => confetti.remove(), 4000);
+        }, i * 30);
+      }
+    }
+    
+    // Update SCORM
+    // Choice persistence functions
+    function saveChoice(slideId, choice) {
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({
+          type: 'choiceUpdate',
+          slideId: slideId,
+          choice: choice,
+          choicesData: {
+            choices: gameState.choices,
+            scenariosCompleted: gameState.scenariosCompleted || 0,
+            urlsChecked: gameState.urlsChecked || []
+          }
+        }, '*');
+      }
+    }
+    
+    function restoreChoices() {
+      const choicesData = gameState.choices || {};
+      
+      // Reset scenario count before restoration
+      gameState.scenariosCompleted = 0;
+      
+      // Restore trust decision with visual indicators
+      if (choicesData['trust_decision'] && gameState.currentSlide === 5) {
+        const choice = choicesData['trust_decision'];
+        const feedbackDiv = document.getElementById('trustFeedback');
+        const buttons = document.querySelectorAll('#slide5 .decision-btn');
+        
+        // Find the selected button based on the saved choice
+        let selectedButton = null;
+        buttons.forEach(btn => {
+          if ((choice === 'normal' && btn.textContent.includes('Everything looks normal')) ||
+              (choice === 'plugin' && btn.textContent.includes('Plugin request is suspicious')) ||
+              (choice === 'url' && btn.textContent.includes('Check the URL carefully')) ||
+              (choice === 'leave' && btn.textContent.includes('Leave the site immediately'))) {
+            selectedButton = btn;
+          }
+        });
+        
+        if (selectedButton && feedbackDiv) {
+          // Make non-selected buttons faded
+          buttons.forEach(btn => {
+            if (btn !== selectedButton) {
+              btn.style.opacity = '0.7';
+              btn.style.transform = 'scale(0.98)';
+            }
+          });
+          
+          // Determine colors based on choice
+          const isCorrect = choice === 'plugin';
+          const isPartial = choice === 'url' || choice === 'leave';
+          const color = isCorrect ? '#4CAF50' : (isPartial ? '#ff9800' : '#f44336');
+          const darkColor = isCorrect ? '#2E7D32' : (isPartial ? '#E65100' : '#C62828');
+          const icon = isCorrect ? '✅' : (isPartial ? '⚠️' : '❌');
+          
+          // Apply strong visual highlighting
+          selectedButton.style.background = `linear-gradient(135deg, ${color}, ${darkColor})`;
+          selectedButton.style.color = 'white';
+          selectedButton.style.fontWeight = 'bold';
+          selectedButton.style.border = `4px solid ${darkColor}`;
+          selectedButton.style.transform = 'scale(1.12)';
+          selectedButton.style.boxShadow = `0 8px 30px ${color}66, 0 0 25px ${color}44`;
+          selectedButton.style.opacity = '1';
+          selectedButton.style.position = 'relative';
+          selectedButton.style.zIndex = '100';
+          
+          // Remove any existing indicators first
+          const existingIndicator = selectedButton.querySelector('.action-indicator');
+          if (existingIndicator) existingIndicator.remove();
+          const existingLabel = selectedButton.querySelector('.action-label');
+          if (existingLabel) existingLabel.remove();
+          
+          // Add fresh icon
+          const iconEl = document.createElement('span');
+          iconEl.className = 'action-indicator';
+          iconEl.style.cssText = 'margin-right: 12px; font-size: 1.6em; vertical-align: middle;';
+          iconEl.textContent = icon;
+          selectedButton.insertBefore(iconEl, selectedButton.firstChild);
+          
+          // Add fresh label
+          const label = document.createElement('div');
+          label.className = 'action-label';
+          label.style.cssText = `
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: ${color};
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+          `;
+          label.textContent = '🎯 YOUR CHOICE';
+          selectedButton.appendChild(label);
+          
+          // Show appropriate feedback
+          if (choice === 'plugin') {
+            feedbackDiv.innerHTML = `<div class="feedback correct" style="display:block;">
+              ✅ Excellent! Legitimate sites never require browser plugins for basic access. This is a major red flag!
+            </div>`;
+            gameState.trustComplete = true;
+            const btn = document.getElementById('trustContinue');
+            if (btn) btn.style.display = 'inline-flex';
+            // Disable all buttons after correct answer
+            buttons.forEach(btn => {
+              btn.disabled = true;
+              if (btn !== selectedButton) {
+                btn.style.opacity = '0.6';
+              }
+            });
+          } else if (choice === 'url') {
+            feedbackDiv.innerHTML = `<div class="feedback warning" style="display:block;">
+              ⚠️ Good instinct to check URLs, but did you see the plugin request?
+            </div>`;
+          } else if (choice === 'leave') {
+            feedbackDiv.innerHTML = `<div class="feedback warning" style="display:block;">
+              ⚠️ Leaving is safe, but identifying the specific threat (plugin request) is important too!
+            </div>`;
+          } else if (choice === 'normal') {
+            feedbackDiv.innerHTML = `<div class="feedback incorrect" style="display:block;">
+              ❌ Look more carefully! Did you notice the security plugin popup?
+            </div>`;
+          }
+        }
+      }
+      
+      // Restore URL checks
+      gameState.urlsFound = 0; // Reset before restoration
+      if (!gameState.urlsChecked) gameState.urlsChecked = [];
+      
+      // Clear the urlsChecked array first, then rebuild from saved choices
+      gameState.urlsChecked = [];
+      
+      Object.keys(choicesData).forEach(key => {
+        if (key.startsWith('url_')) {
+          const url = key.replace('url_', '');
+          // Add to checked list
+          gameState.urlsChecked.push(url);
+          
+          // Find and mark the URL element
+          const element = document.querySelector(`[onclick*="${url}"]`);
+          if (element) {
+            // Remove any existing classes first
+            element.classList.remove('correct', 'incorrect');
+            
+            // Check if this URL is suspicious based on the onclick parameters
+            const onclickStr = element.getAttribute('onclick');
+            if (onclickStr && onclickStr.includes('true')) {
+              element.classList.add('correct');
+              gameState.urlsFound++;
+            } else {
+              element.classList.add('incorrect');
+            }
+          }
+        }
+      });
+      
+      // Update URL score
+      const scoreEl = document.getElementById('urlScore');
+      if (scoreEl) {
+        scoreEl.textContent = gameState.urlsFound + '/' + gameState.totalSuspiciousUrls;
+        // Show continue button if all found
+        if (gameState.urlsFound === gameState.totalSuspiciousUrls) {
+          const btn = document.getElementById('urlContinue');
+          if (btn) btn.style.display = 'inline-flex';
+        }
+      }
+      
+      // Restore response decision with visual indicators
+      if (choicesData['response_decision'] && gameState.currentSlide === 7) {
+        const choice = choicesData['response_decision'];
+        const feedbackDiv = document.getElementById('responseFeedback');
+        const buttons = document.querySelectorAll('#slide7 .decision-btn');
+        
+        // Find the selected button based on the saved choice
+        let selectedButton = null;
+        buttons.forEach(btn => {
+          if ((choice === 'login' && btn.textContent.includes('Log in if the page')) ||
+              (choice === 'verify' && btn.textContent.includes('Verify the URL')) ||
+              (choice === 'password' && btn.textContent.includes('Enter credentials then')) ||
+              (choice === 'report' && btn.textContent.includes('Close immediately and report'))) {
+            selectedButton = btn;
+          }
+        });
+        
+        if (selectedButton && feedbackDiv) {
+          // Make non-selected buttons faded
+          buttons.forEach(btn => {
+            if (btn !== selectedButton) {
+              btn.style.opacity = '0.7';
+              btn.style.transform = 'scale(0.98)';
+            }
+          });
+          
+          // Determine colors based on choice
+          const isCorrect = choice === 'verify' || choice === 'report';
+          const isPartial = false;
+          const color = isCorrect ? '#4CAF50' : '#f44336';
+          const darkColor = isCorrect ? '#2E7D32' : '#C62828';
+          const icon = isCorrect ? '✅' : '❌';
+          
+          // Apply strong visual highlighting
+          selectedButton.style.background = `linear-gradient(135deg, ${color}, ${darkColor})`;
+          selectedButton.style.color = 'white';
+          selectedButton.style.fontWeight = 'bold';
+          selectedButton.style.border = `4px solid ${darkColor}`;
+          selectedButton.style.transform = 'scale(1.12)';
+          selectedButton.style.boxShadow = `0 8px 30px ${color}66, 0 0 25px ${color}44`;
+          selectedButton.style.opacity = '1';
+          selectedButton.style.position = 'relative';
+          selectedButton.style.zIndex = '100';
+          
+          // Remove any existing indicators first
+          const existingIndicator = selectedButton.querySelector('.action-indicator');
+          if (existingIndicator) existingIndicator.remove();
+          const existingLabel = selectedButton.querySelector('.action-label');
+          if (existingLabel) existingLabel.remove();
+          
+          // Add fresh icon
+          const iconEl = document.createElement('span');
+          iconEl.className = 'action-indicator';
+          iconEl.style.cssText = 'margin-right: 12px; font-size: 1.6em; vertical-align: middle;';
+          iconEl.textContent = icon;
+          selectedButton.insertBefore(iconEl, selectedButton.firstChild);
+          
+          // Add fresh label
+          const label = document.createElement('div');
+          label.className = 'action-label';
+          label.style.cssText = `
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: ${color};
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+          `;
+          label.textContent = '🎯 YOUR CHOICE';
+          selectedButton.appendChild(label);
+          
+          // Show appropriate feedback
+          if (choice === 'verify') {
+            feedbackDiv.innerHTML = `<div class="feedback correct" style="display:block;">
+              ✅ Perfect! Always verify URLs and use bookmarks or type the URL directly. The real AWS domain is aws.amazon.com, not aws-console-signin.net!
+            </div>`;
+            gameState.responseComplete = true;
+            const btn = document.getElementById('responseContinue');
+            if (btn) btn.style.display = 'inline-flex';
+            // Disable all buttons after correct answer
+            buttons.forEach(btn => {
+              btn.disabled = true;
+              if (btn !== selectedButton) {
+                btn.style.opacity = '0.6';
+              }
+            });
+          } else if (choice === 'report') {
+            feedbackDiv.innerHTML = `<div class="feedback correct" style="display:block;">
+              ✅ Excellent! Closing the page immediately and reporting to Security is a safe response. This prevents credential theft and alerts the security team.
+            </div>`;
+            gameState.responseComplete = true;
+            const btn = document.getElementById('responseContinue');
+            if (btn) btn.style.display = 'inline-flex';
+            // Disable all buttons after correct answer
+            buttons.forEach(btn => {
+              btn.disabled = true;
+              if (btn !== selectedButton) {
+                btn.style.opacity = '0.6';
+              }
+            });
+          } else if (choice === 'login') {
+            feedbackDiv.innerHTML = `<div class="feedback incorrect" style="display:block;">
+              ❌ NEVER enter credentials on suspicious domains! This is a phishing site using a look-alike domain.
+            </div>`;
+          } else if (choice === 'password') {
+            feedbackDiv.innerHTML = `<div class="feedback incorrect" style="display:block;">
+              ❌ Never enter credentials first! Once entered, attackers have them immediately.
+            </div>`;
+          }
+        }
+      }
+      
+      // Now restore scenario choices
+      Object.keys(choicesData).forEach(choiceKey => {
+        const choice = choicesData[choiceKey];
+        if (choiceKey.startsWith('scenario_')) {
+          const scenarioIndex = parseInt(choiceKey.split('_')[1]);
+          
+          // Find the scenario buttons and mark the chosen one
+          const buttons = document.querySelectorAll(`#scenario${scenarioIndex}Options button`);
+          if (buttons.length > choice && choice !== undefined) {
+            buttons[choice].classList.add('selected');
+            
+            // Show the feedback
+            const scenarios = [
+              {
+                options: [
+                  { feedback: 'Correct — malicious prompts on trusted sites are a hallmark of watering hole attacks.', correct: true },
+                  { feedback: 'Hangs can happen for many benign reasons. Not sufficient by itself.', correct: false },
+                  { feedback: 'Maintenance happens; not evidence of compromise on its own.', correct: false }
+                ]
+              },
+              {
+                options: [
+                  { feedback: 'Appearance can be spoofed; don\'t trust looks alone.', correct: false },
+                  { feedback: 'Correct — verify the URL and use trusted bookmarks to avoid look‑alike domains.', correct: true },
+                  { feedback: 'Never enter credentials on a suspicious page.', correct: false }
+                ]
+              },
+              {
+                options: [
+                  { feedback: 'Correct — report to Security and isolate impacted systems.', correct: true },
+                  { feedback: 'Public posts can tip attackers or cause confusion; use internal channels.', correct: false },
+                  { feedback: 'Never install unverified updates suggested by websites.', correct: false }
+                ]
+              }
+            ];
+            
+            const option = scenarios[scenarioIndex] && scenarios[scenarioIndex].options[choice];
+            const feedbackDiv = document.getElementById(`scenario${scenarioIndex}Feedback`);
+            
+            // Only proceed if we have the feedback div (scenarios are loaded)
+            if (!feedbackDiv) return; // Skip this scenario if not loaded yet
+            
+            if (option) {
+              // Clear all button styling first
+              buttons.forEach(btn => {
+                btn.style.background = '';
+                btn.style.color = '';
+                btn.style.fontWeight = '';
+                btn.style.border = '';
+                btn.style.opacity = '';
+              });
+              
+              // Highlight only the saved selected button
+              buttons[choice].style.background = option.correct ? 'linear-gradient(135deg, #4CAF50, #45a049)' : 'linear-gradient(135deg, #ff9800, #f57c00)';
+              buttons[choice].style.color = 'white';
+              buttons[choice].style.fontWeight = '600';
+              buttons[choice].style.border = option.correct ? '2px solid #4CAF50' : '2px solid #ff9800';
+              
+              if (option.correct) {
+                // This was a correct answer
+                feedbackDiv.innerHTML = `<div class="feedback correct" style="display:block;">
+                  ✅ ${option.feedback}
+                </div>`;
+                // Disable all buttons for correct answers
+                buttons.forEach(btn => {
+                  btn.disabled = true;
+                  btn.classList.add('disabled');
+                });
+                // Count this as completed since it's a correct answer
+                if (!gameState.scenariosCompleted) gameState.scenariosCompleted = 0;
+                gameState.scenariosCompleted++;
+              } else {
+                // This was an incorrect answer - show feedback but allow retrying
+                feedbackDiv.innerHTML = `<div class="feedback incorrect" style="display:block;">
+                  ❌ ${option.feedback} Try again!
+                </div>`;
+                // Mark the incorrect button but keep enabled
+              }
+            }
+          }
+        }
+      });
+      
+      // Check if all scenarios are completed to show the complete button
+      if (gameState.scenariosCompleted >= gameState.totalScenarios) {
+        const completeBtn = document.getElementById('completeBtn');
+        if (completeBtn) completeBtn.style.display = 'inline-flex';
+      }
+    }
+
+    function updateSCORM() {
+      if (scorm.api) {
+        scorm.setValue('cmi.core.lesson_location', String(gameState.currentSlide));
+        scorm.setValue('cmi.suspend_data', JSON.stringify({
+          currentSlide: gameState.currentSlide,
+          achievements: gameState.achievements
+        }));
+        scorm.commit();
+      }
+    }
+    
+    // Initialize
+    window.onload = function() {
+      
+      // Check if SCORM should be disabled (when loaded in iframe)
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('scorm') !== 'disabled') {
+        scorm.init();
+      }
+      
+      // Check if we should resume from a specific slide
+      const resumeSlide = urlParams.get('slide');
+      if (resumeSlide && !isNaN(resumeSlide)) {
+        gameState.currentSlide = parseInt(resumeSlide);
+        // Show the correct slide immediately to avoid flash
+        showSlide(gameState.currentSlide);
+      }
+      
+      
+      // Restore choices if provided
+      const savedChoices = urlParams.get('choices');
+      if (savedChoices) {
+        try {
+          const choicesData = JSON.parse(decodeURIComponent(savedChoices));
+          if (choicesData.choices !== undefined) {
+            gameState.choices = choicesData.choices;
+            gameState.scenariosCompleted = choicesData.scenariosCompleted || 0;
+            // Don't restore urlsChecked here - it will be rebuilt from choices
+          } else {
+            gameState.choices = choicesData;
+          }
+          // Don't restore here - will be done when reaching the specific slide
+        } catch (e) {
+          console.warn('Failed to parse saved choices:', e);
+        }
+      }
+      
+      updateProgress();
+      updateSCORM();
+      
+      // If we're resuming on a slide with choices, restore them with minimal delay
+      if ((gameState.currentSlide === 5 || gameState.currentSlide === 6 || gameState.currentSlide === 7) && savedChoices) {
+        setTimeout(restoreChoices, 50);
+      }
+      
+      // If we're resuming on the scenario slide, load scenarios and restore after delay
+      if (gameState.currentSlide === 8) {
+        loadScenarios();
+        if (savedChoices) {
+          setTimeout(restoreChoices, 50);
+        }
+      }
+    };
+    
+    // Owl easter egg
+    function owlClick() {
+      const owl = document.querySelector('.grc-owl');
+      owl.style.animation = 'none';
+      setTimeout(() => {
+        owl.style.animation = 'bounce 2s ease-in-out infinite, spin 0.5s ease';
+      }, 10);
+      if (!gameState.achievements.includes('owl')) {
+        gameState.achievements.push('owl');
+        showAchievement('👾', 'Wise Discovery!', 'You found the easter egg!');
+      }
+      // If in iframe, send message to parent to go home
+      if (window.parent !== window) {
+        window.parent.postMessage({ type: 'goHome' }, '*');
+      }
+    }
+  </script>
+</body>
+</html>
