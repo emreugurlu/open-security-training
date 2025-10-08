@@ -870,8 +870,87 @@
   </div>
   
   <div class="main-content">
+    <!-- Welcome/About Screen -->
+    <div class="policy-attestation" id="welcomeScreen">
+      <div class="attestation-container">
+        <div class="grc-logo-header">
+          <span style="font-size: 48px;">👾</span>
+          <h1>Open Source Cybersecurity Training</h1>
+        </div>
+
+        <div class="attestation-content" style="overflow-y: auto;">
+          <h2>🎓 Welcome to Interactive Security Training</h2>
+
+          <div class="policy-info">
+            <p style="font-size: 16px; margin-bottom: 24px;">
+              This is a <strong>free, open-source</strong> cybersecurity and privacy training platform designed to help organizations educate their teams on essential security practices.
+            </p>
+
+            <div class="policy-link-box">
+              <h3>🏗️ About This Implementation</h3>
+              <p style="margin-bottom: 16px;"><strong>How It Works:</strong></p>
+              <ul style="text-align: left; color: #666; font-size: 14px; line-height: 1.8; margin: 0; padding-left: 20px;">
+                <li><strong>6 Interactive Modules:</strong> Phishing, CEO Fraud, Watering Hole Attacks, General Security, Privacy, and Secure Coding</li>
+                <li><strong>No Login Required:</strong> Progress saved locally in your browser</li>
+                <li><strong>LMS Integration:</strong> SCORM 1.2/2004 compatible for enterprise deployment</li>
+                <li><strong>Gamified Learning:</strong> Interactive simulations with instant feedback</li>
+              </ul>
+            </div>
+
+            <div class="policy-link-box" style="margin-top: 20px;">
+              <h3>🌐 Open Source & Free</h3>
+              <p style="margin-bottom: 12px;">
+                This training is completely <strong>free and open source</strong>. You can:
+              </p>
+              <ul style="text-align: left; color: #666; font-size: 14px; line-height: 1.8; margin: 0; padding-left: 20px;">
+                <li>Deploy it in your organization without any licensing fees</li>
+                <li>Customize content, branding, and examples for your needs</li>
+                <li>Contribute improvements back to the community</li>
+                <li>View source code on GitHub: <a href="https://github.com/emreugurlu/open-security-training" target="_blank" style="color: var(--primary-purple); text-decoration: underline;">github.com/emreugurlu/open-security-training</a></li>
+              </ul>
+            </div>
+
+            <div class="policy-link-box" style="margin-top: 20px;">
+              <h3>🤝 Credits & Contributors</h3>
+              <p style="margin-bottom: 12px;">
+                <strong>Developer:</strong> Emre Ugurlu
+              </p>
+              <p style="margin-bottom: 12px; font-size: 14px; color: #666;">
+                <strong>Special Thanks:</strong> Chad Fryer for the awesome idea and concept
+              </p>
+              <p style="margin-bottom: 12px; margin-top: 16px;">
+                Connect with us on LinkedIn:
+              </p>
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <a href="https://www.linkedin.com/in/emre-ugurlu-48596b116/" target="_blank" style="color: var(--primary-purple); text-decoration: none; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                  <span>💼</span>
+                  <span style="text-decoration: underline;">Emre Ugurlu</span>
+                </a>
+                <a href="https://www.linkedin.com/in/c-fryer/" target="_blank" style="color: var(--primary-purple); text-decoration: none; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                  <span>💼</span>
+                  <span style="text-decoration: underline;">Chad Fryer</span>
+                </a>
+              </div>
+            </div>
+
+            <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 16px; border-radius: 4px; margin-top: 20px;">
+              <p style="margin: 0; color: #0d47a1; font-size: 14px; line-height: 1.6;">
+                <strong>💼 For Organizations:</strong> Customize the policy attestation, branding, and content to match your security requirements. Link to your actual security policies before deployment.
+              </p>
+            </div>
+          </div>
+
+          <div class="attestation-form">
+            <button class="attest-button" onclick="showPolicyAttestation()" style="margin-top: 20px;">
+              Continue to Policy Acknowledgment →
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Policy Attestation Screen -->
-    <div class="policy-attestation" id="policyAttestation">
+    <div class="policy-attestation" id="policyAttestation" style="display: none;">
       <div class="attestation-container">
         <div class="grc-logo-header">
           <span style="font-size: 48px;">👾</span>
@@ -891,7 +970,7 @@
               <a href="#"
                  target="_blank"
                  class="policy-link"
-                 onclick="alert('Configure this link to point to your organization\'s policy repository'); return false;">
+                 onclick="showPolicyPopup(); return false;">
                 <span class="link-icon">🔗</span>
                 <span class="link-text">View Organization Policies & Procedures</span>
                 <span class="link-arrow">→</span>
@@ -1185,11 +1264,12 @@
       const version = getTrainingVersion();
       const attestationComplete = localStorage.getItem(`policyAttestationComplete_${version}`);
       if (attestationComplete === 'true') {
+        document.getElementById('welcomeScreen').style.display = 'none';
         document.getElementById('policyAttestation').style.display = 'none';
         document.getElementById('homeScreen').style.display = 'flex';
         document.getElementById('sidebar').style.display = 'flex';
         document.querySelector('.sidebar-toggle').style.display = 'flex';
-        
+
         // Check if all modules are complete and show banner if so
         let allComplete = true;
         Object.keys(modules).forEach(key => {
@@ -1197,7 +1277,7 @@
             allComplete = false;
           }
         });
-        
+
         if (allComplete) {
           document.getElementById('completionBanner').style.display = 'block';
         }
@@ -1207,6 +1287,12 @@
         document.querySelector('.sidebar-toggle').style.display = 'none';
       }
     };
+
+    // Show policy attestation screen (from welcome)
+    function showPolicyAttestation() {
+      document.getElementById('welcomeScreen').style.display = 'none';
+      document.getElementById('policyAttestation').style.display = 'flex';
+    }
     
     // Toggle attestation button based on checkbox
     function toggleAttestButton() {
@@ -1735,6 +1821,47 @@
       mainContent.appendChild(div.firstElementChild);
     }
     
+    // Policy popup function
+    function showPolicyPopup() {
+      const popupHTML = `
+        <div id="policyPopup" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0); display: flex; align-items: center; justify-content: center; z-index: 2000; transition: background 0.3s ease;">
+          <div id="policyPopupContent" style="background: white; border-radius: 16px; width: 90%; max-width: 500px; padding: 40px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3); transform: scale(0.7); opacity: 0; transition: all 0.3s ease;">
+            <div style="font-size: 64px; margin-bottom: 20px;">📋</div>
+            <h2 style="color: var(--primary-purple); margin-bottom: 16px;">Configure Policy Link</h2>
+            <p style="color: #666; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
+              This link should point to your organization's policy repository. Update the href attribute in the HTML to configure this link before deployment.
+            </p>
+            <button onclick="closePolicyPopup()" style="background: linear-gradient(135deg, var(--primary-purple) 0%, var(--dark-purple) 100%); color: white; border: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+              OK
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', popupHTML);
+      requestAnimationFrame(() => {
+        const popup = document.getElementById('policyPopup');
+        const content = document.getElementById('policyPopupContent');
+        if (popup && content) {
+          popup.style.background = 'rgba(0,0,0,0.7)';
+          content.style.transform = 'scale(1)';
+          content.style.opacity = '1';
+        }
+      });
+    }
+
+    function closePolicyPopup() {
+      const popup = document.getElementById('policyPopup');
+      const content = document.getElementById('policyPopupContent');
+      if (popup && content) {
+        popup.style.background = 'rgba(0,0,0,0)';
+        content.style.transform = 'scale(0.7)';
+        content.style.opacity = '0';
+        setTimeout(() => {
+          popup.remove();
+        }, 300);
+      }
+    }
+
     // Reset modal functions
     function showResetModal() {
       const modal = document.getElementById('resetModal');
