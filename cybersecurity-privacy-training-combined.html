@@ -1656,31 +1656,47 @@
     
     function showFeedbackForm() {
       const feedbackHTML = `
-        <div id="feedbackOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 2000;">
-          <div style="background: white; border-radius: 16px; width: 90%; max-width: 600px; padding: 40px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
-            <div style="font-size: 64px; margin-bottom: 20px;">📝</div>
-            <h2 style="color: var(--primary-purple); margin-bottom: 16px;">Feedback Form</h2>
-            <p style="color: #666; font-size: 16px; margin-bottom: 24px; line-height: 1.6;">
-              Replace this with your own feedback form URL or survey tool.<br>
-              You can embed a Google Form, Typeform, or any other feedback solution.
-            </p>
-            <p style="background: #f5f5f5; padding: 16px; border-radius: 8px; font-family: monospace; font-size: 14px; color: #333; margin-bottom: 24px; text-align: left;">
-              Edit line 1550 in<br>
-              <strong>cybersecurity-privacy-training-combined.html</strong><br>
-              to add your feedback form iframe or link.
-            </p>
-            <button onclick="closeFeedbackForm()" style="background: var(--primary-purple); color: white; border: none; padding: 12px 32px; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: 600;">
-              Close
-            </button>
+        <div id="feedbackOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0); display: flex; align-items: center; justify-content: center; z-index: 2000; transition: background 0.3s ease;">
+          <div id="feedbackContent" style="background: white; border-radius: 16px; width: 90%; max-width: 700px; height: 90vh; padding: 0; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3); transform: scale(0.7); opacity: 0; transition: all 0.3s ease; display: flex; flex-direction: column; overflow: hidden;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px 30px; border-bottom: 1px solid #e0e0e0; flex-shrink: 0;">
+              <h2 style="color: var(--primary-purple); margin: 0; font-size: 24px;">📝 Training Feedback</h2>
+              <button onclick="closeFeedbackForm()" style="background: transparent; border: none; color: #999; font-size: 28px; cursor: pointer; padding: 0; line-height: 1; transition: color 0.2s ease;" onmouseover="this.style.color='#333'" onmouseout="this.style.color='#999'">×</button>
+            </div>
+            <div style="flex: 1; overflow: hidden; position: relative;">
+              <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSds7gbYqZDBn1DxUs3jwaKcZq85mEfFfi7Ly2rWQBdjeU2Xjg/viewform?embedded=true" width="100%" height="100%" frameborder="0" marginheight="0" marginwidth="0" style="border: none; display: block; position: absolute; top: 0; left: 0; width: 100%; height: 100%;">Loading…</iframe>
+            </div>
           </div>
         </div>
       `;
       document.body.insertAdjacentHTML('beforeend', feedbackHTML);
+
+      // Trigger animation immediately
+      requestAnimationFrame(() => {
+        const overlay = document.getElementById('feedbackOverlay');
+        const content = document.getElementById('feedbackContent');
+        if (overlay && content) {
+          overlay.style.background = 'rgba(0,0,0,0.7)';
+          content.style.transform = 'scale(1)';
+          content.style.opacity = '1';
+        }
+      });
     }
-    
+
     function closeFeedbackForm() {
       const overlay = document.getElementById('feedbackOverlay');
-      if (overlay) overlay.remove();
+      const content = document.getElementById('feedbackContent');
+
+      if (overlay && content) {
+        // Animate out
+        overlay.style.background = 'rgba(0,0,0,0)';
+        content.style.transform = 'scale(0.7)';
+        content.style.opacity = '0';
+
+        // Remove after animation completes
+        setTimeout(() => {
+          overlay.remove();
+        }, 300);
+      }
     }
     
     function closeCompletionScreen() {
