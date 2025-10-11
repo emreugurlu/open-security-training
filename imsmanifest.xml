@@ -23,8 +23,8 @@
   </organizations>
   
   <resources>
-    <resource identifier="resource_combined" type="webcontent" adlcp:scormtype="sco" href="cybersecurity-privacy-training-combined.html">
-      <file href="cybersecurity-privacy-training-combined.html"/>
+    <resource identifier="resource_combined" type="webcontent" adlcp:scormtype="sco" href="index.html">
+      <file href="index.html"/>
       <file href="phishing-smishing-vishing-training/enhanced-interactive-training.html"/>
       <file href="ceo-executive-fraud-training/enhanced-interactive-training.html"/>
       <file href="watering-hole-attacks-training/enhanced-interactive-training.html"/>

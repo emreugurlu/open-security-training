@@ -11,7 +11,7 @@ mkdir -p $PACKAGE_DIR
 
 # Copy the main files
 echo "Copying main training file..."
-cp cybersecurity-privacy-training-combined.html $PACKAGE_DIR/
+cp index.html $PACKAGE_DIR/
 
 # Copy the manifest
 echo "Copying SCORM manifest..."
@@ -49,7 +49,7 @@ echo "✅ SCORM package created: cybersecurity-privacy-training-scorm.zip"
 echo ""
 echo "This package contains:"
 echo "  - imsmanifest.xml (SCORM manifest)"
-echo "  - cybersecurity-privacy-training-combined.html (main launcher)"
+echo "  - index.html (main launcher)"
 echo "  - All six training modules in their directories"
 echo ""
 echo "You can now upload this ZIP file to any SCORM-compliant LMS!"
